@@ -30,5 +30,6 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "terra-nova-precision-agri-tech-hero-and-single-page-experience", "terra-landing-page"]
 }
+
