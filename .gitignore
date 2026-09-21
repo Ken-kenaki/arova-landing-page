@@ -43,6 +43,8 @@ next-env.d.ts
 # OpenNext
 .open-next
 
+ai-flow
+
 # wrangler files
 .wrangler
 .dev.vars*

@@ -194,7 +194,7 @@ export default function TerraPage() {
   return (
     <div className="relative min-h-screen bg-[#0B0C0F] text-[#F2F3F5] overflow-x-hidden">
       {/* Fixed Header with Glassmorphism Effect */}
-      <header className="fixed top-6 left-6 right-6 md:right-auto md:w-auto z-40 border border-white/40 backdrop-blur-xl bg-white/80 text-black shadow-xl rounded-full">
+      <header className="fixed top-6 left-6 right-6 md:right-auto md:w-auto z-[60] border border-white/40 backdrop-blur-xl bg-white/80 text-black shadow-xl rounded-full">
         <div className="w-full mx-auto px-6">
           <div className="flex items-center gap-6 md:h-14 h-14">
             <button
@@ -252,6 +252,13 @@ export default function TerraPage() {
       {/* Mobile Drawer */}
       {isMenuOpen && (
         <div className="fixed inset-0 bg-[#0B0C0F]/95 backdrop-blur-md z-50 flex flex-col items-start justify-end pb-20 pt-20 px-6">
+          <button
+            onClick={() => setIsMenuOpen(false)}
+            className="absolute top-8 right-8 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400 md:hidden"
+            aria-label="Close menu"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
           <div className="flex flex-col gap-8 items-start text-left w-full">
             <button
               onClick={() => scrollToSection("product")}
@@ -353,10 +360,14 @@ export default function TerraPage() {
                   transition: "transform 0.05s linear",
                 }}
               >
-                <img
-                  src="/hero-small.jpg"
-                  alt="Arova AI Presentation Copilot Interface"
-                  className="object-cover dashboard-image w-full h-auto"
+                <video
+                  src="/hero-small.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  aria-label="Arova AI Presentation Copilot Interface"
+                  className="object-cover dashboard-image w-full h-full"
                 />
               </div>
             </div>
