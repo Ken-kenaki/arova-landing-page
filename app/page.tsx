@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Menu, X, ChevronDown, Mic, Sparkles, Presentation, Check, ArrowUpRight, Zap } from "lucide-react"
 import { AnimatedText } from "@/components/animated-text"
@@ -100,6 +101,15 @@ export default function TerraPage() {
   const [dashboardScrollOffset, setDashboardScrollOffset] = useState(0)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
   const [waitlistSubmitted, setWaitlistSubmitted] = useState(false)
+  const [waitlistLoading, setWaitlistLoading] = useState(false)
+  const [waitlistError, setWaitlistError] = useState("")
+  const [waitlistForm, setWaitlistForm] = useState({
+    fullName: "",
+    email: "",
+    presentationType: "",
+    frequency: "",
+    nextPresentation: "",
+  })
 
   const dashboardRef = useRef<HTMLDivElement>(null)
   const heroRef = useRef<HTMLDivElement>(null)
@@ -191,6 +201,31 @@ export default function TerraPage() {
     setIsMenuOpen(false)
   }
 
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setWaitlistLoading(true)
+    setWaitlistError("")
+
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(waitlistForm),
+      })
+
+      if (response.ok) {
+        setWaitlistSubmitted(true)
+      } else {
+        const errorData = await response.json()
+        setWaitlistError(errorData.error || "Failed to join waitlist. Please try again.")
+      }
+    } catch {
+      setWaitlistError("An error occurred. Please try again.")
+    } finally {
+      setWaitlistLoading(false)
+    }
+  }
+
   return (
     <div className="relative min-h-screen bg-[#0B0C0F] text-[#F2F3F5] overflow-x-hidden">
       {/* Fixed Header with Glassmorphism Effect */}
@@ -230,6 +265,12 @@ export default function TerraPage() {
               >
                 FAQ
               </button>
+              <Link
+                href="/login"
+                className="text-sm text-zinc-800 hover:text-black font-medium transition-colors duration-300"
+              >
+                Login
+              </Link>
               <button
                 onClick={() => scrollToSection("early-access")}
                 className="px-5 py-2 rounded-full bg-black text-white hover:bg-zinc-800 text-sm font-medium transition-all shadow-sm hover:shadow"
@@ -284,6 +325,13 @@ export default function TerraPage() {
             >
               FAQ
             </button>
+            <Link
+              href="/login"
+              onClick={() => setIsMenuOpen(false)}
+              className="font-serif text-5xl md:text-7xl font-light text-[#F2F3F5] hover:text-pink-400 transition-colors duration-300"
+            >
+              Login
+            </Link>
           </div>
         </div>
       )}
@@ -650,18 +698,24 @@ export default function TerraPage() {
                 <p className="text-[#A7ABB3] text-sm">We'll let you know when Arova Early Access opens.</p>
               </div>
             ) : (
-              <form onSubmit={(e) => { e.preventDefault(); setWaitlistSubmitted(true); }} className="space-y-6">
+              <form onSubmit={handleWaitlistSubmit} className="space-y-6">
+                {waitlistError && (
+                  <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl text-xs bg-red-500/15 border border-red-500/20 text-[#F2F3F5]">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1 flex-shrink-0" />
+                    {waitlistError}
+                  </div>
+                )}
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-[#A7ABB3] mb-2 font-semibold">Full Name</label>
-                  <input required type="text" placeholder="Jane Doe" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-[#A7ABB3]/50 focus:outline-none focus:border-pink-400/60 transition-all text-sm" />
+                  <input required type="text" placeholder="Jane Doe" value={waitlistForm.fullName} onChange={(e) => setWaitlistForm({ ...waitlistForm, fullName: e.target.value })} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-[#A7ABB3]/50 focus:outline-none focus:border-pink-400/60 transition-all text-sm" />
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-[#A7ABB3] mb-2 font-semibold">Email Address</label>
-                  <input required type="email" placeholder="jane@example.com" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-[#A7ABB3]/50 focus:outline-none focus:border-pink-400/60 transition-all text-sm" />
+                  <input required type="email" placeholder="jane@example.com" value={waitlistForm.email} onChange={(e) => setWaitlistForm({ ...waitlistForm, email: e.target.value })} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-[#A7ABB3]/50 focus:outline-none focus:border-pink-400/60 transition-all text-sm" />
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-[#A7ABB3] mb-2 font-semibold">What do you usually present?</label>
-                  <select required defaultValue="" className="w-full px-4 py-3 bg-[#0B0C0F] border border-white/10 rounded-xl text-white outline-none focus:border-pink-400/60 transition-all text-sm appearance-none">
+                  <select required value={waitlistForm.presentationType} onChange={(e) => setWaitlistForm({ ...waitlistForm, presentationType: e.target.value })} className="w-full px-4 py-3 bg-[#0B0C0F] border border-white/10 rounded-xl text-white outline-none focus:border-pink-400/60 transition-all text-sm appearance-none">
                     <option value="" disabled>Select an option</option>
                     <option value="university">University / Class</option>
                     <option value="teaching">Teaching / Lecturing</option>
@@ -674,7 +728,7 @@ export default function TerraPage() {
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-[#A7ABB3] mb-2 font-semibold">How often do you present?</label>
-                  <select required defaultValue="" className="w-full px-4 py-3 bg-[#0B0C0F] border border-white/10 rounded-xl text-white outline-none focus:border-pink-400/60 transition-all text-sm appearance-none">
+                  <select required value={waitlistForm.frequency} onChange={(e) => setWaitlistForm({ ...waitlistForm, frequency: e.target.value })} className="w-full px-4 py-3 bg-[#0B0C0F] border border-white/10 rounded-xl text-white outline-none focus:border-pink-400/60 transition-all text-sm appearance-none">
                     <option value="" disabled>Select an option</option>
                     <option value="rarely">Less than once a month</option>
                     <option value="monthly">1–3 times a month</option>
@@ -684,11 +738,18 @@ export default function TerraPage() {
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-[#A7ABB3] mb-2 font-semibold">When is your next presentation? (Optional)</label>
-                  <input type="text" placeholder="e.g. Next Tuesday" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-[#A7ABB3]/50 focus:outline-none focus:border-pink-400/60 transition-all text-sm" />
+                  <input type="text" placeholder="e.g. Next Tuesday" value={waitlistForm.nextPresentation} onChange={(e) => setWaitlistForm({ ...waitlistForm, nextPresentation: e.target.value })} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-[#A7ABB3]/50 focus:outline-none focus:border-pink-400/60 transition-all text-sm" />
                 </div>
 
-                <Button type="submit" className="w-full glass-button py-6 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-all text-white font-medium text-base">
-                  Join the Waitlist
+                <Button type="submit" disabled={waitlistLoading} className="w-full glass-button py-6 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-all text-white font-medium text-base disabled:opacity-70 disabled:cursor-not-allowed">
+                  {waitlistLoading ? (
+                    <span className="flex items-center justify-center gap-3">
+                      <span className="relative w-4 h-4 inline-block"><span className="absolute inset-0 rounded-full border-2 border-white/20" /><span className="absolute inset-0 rounded-full border-2 border-transparent border-t-white animate-spin" /></span>
+                      Submitting...
+                    </span>
+                  ) : (
+                    "Join the Waitlist"
+                  )}
                 </Button>
               </form>
             )}
